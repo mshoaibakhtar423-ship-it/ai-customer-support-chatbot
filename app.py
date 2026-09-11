@@ -6,24 +6,37 @@ st.set_page_config(
     page_icon="🤖"
 )
 
-# Header
 st.title("🤖 AI Customer Support Chatbot")
 st.write("Welcome! How can I help you today?")
 st.info("You can chat in English or Roman Urdu.")
 
+# Chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Show previous messages
+for chat in st.session_state.messages:
+    with st.chat_message(chat["role"]):
+        st.write(chat["content"])
+
 # Chat input
-message = st.text_input(
-    "💬 Enter your message:",
-    placeholder="Example: Where is my order? / Mera order kahan hai?"
+message = st.chat_input(
+    "Type your message..."
 )
 
 if message:
     msg = message.lower().strip()
 
+    # Save user message
+    st.session_state.messages.append({
+        "role": "user",
+        "content": message
+    })
+
     # Greeting
     if re.search(r"\b(hello|hi|hey)\b", msg) or any(x in msg for x in [
-        "salam", "assalam", "aoa", "kya haal", "kaise ho",
-        "kaisay ho", "kese ho"
+        "salam", "assalam", "aoa", "kya haal",
+        "kaise ho", "kaisay ho", "kese ho"
     ]):
         response = (
             "Hello! 👋 Welcome to our customer support. "
@@ -33,8 +46,8 @@ if message:
 
     # Price
     elif any(x in msg for x in [
-        "price", "cost", "rate", "qeemat", "kitne", "kitni",
-        "paisa", "paise", "daam"
+        "price", "cost", "rate", "qeemat",
+        "kitne", "kitni", "paisa", "paise", "daam"
     ]):
         response = (
             "💰 Please tell me the product name and I will help "
@@ -45,8 +58,8 @@ if message:
 
     # Order
     elif any(x in msg for x in [
-        "order", "tracking", "mera order", "apna order",
-        "order kahan", "order kidhar"
+        "order", "tracking", "mera order",
+        "apna order", "order kahan", "order kidhar"
     ]):
         response = (
             "📦 Please provide your order number for order status.\n\n"
@@ -56,8 +69,9 @@ if message:
 
     # Delivery
     elif any(x in msg for x in [
-        "delivery", "shipping", "deliver", "delivery kab",
-        "kab ayegi", "kab ayega", "kitne din", "kitnay din"
+        "delivery", "shipping", "deliver",
+        "delivery kab", "kab ayegi", "kab ayega",
+        "kitne din", "kitnay din"
     ]):
         response = (
             "🚚 Please provide your order number or location "
@@ -68,8 +82,9 @@ if message:
 
     # Return / Refund
     elif any(x in msg for x in [
-        "return", "refund", "exchange", "wapas",
-        "paise wapas", "refund chahiye", "return karna"
+        "return", "refund", "exchange",
+        "wapas", "paise wapas",
+        "refund chahiye", "return karna"
     ]):
         response = (
             "🔄 For a return, refund, or exchange, please provide "
@@ -80,8 +95,9 @@ if message:
 
     # Support
     elif any(x in msg for x in [
-        "contact", "support", "agent", "representative",
-        "madad", "help chahiye", "customer care"
+        "contact", "support", "agent",
+        "representative", "madad",
+        "help chahiye", "customer care"
     ]):
         response = (
             "📞 Please tell me your problem and order number.\n\n"
@@ -91,7 +107,8 @@ if message:
 
     # Thank you
     elif any(x in msg for x in [
-        "thank", "thanks", "shukriya", "bohat shukriya"
+        "thank", "thanks", "shukriya",
+        "bohat shukriya"
     ]):
         response = (
             "You're welcome! 😊 Is there anything else I can help you with?\n\n"
@@ -119,6 +136,15 @@ if message:
             "• Customer Support 📞\n\n"
             "Maazrat, main aap ka sawal samajh nahi saka."
         )
+
+    # Save bot response
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": response
+    })
+
+    # Refresh screen
+    st.rerun()
 
     st.write("### 🤖 Bot Response")
     st.success(response)
