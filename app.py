@@ -1,5 +1,4 @@
 import streamlit as st
-import re
 
 st.set_page_config(
     page_title="AI Customer Support Chatbot",
@@ -14,137 +13,130 @@ st.info("You can chat in English or Roman Urdu.")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Show previous messages
+# FAQ selected message
+if "pending_message" not in st.session_state:
+    st.session_state.pending_message = None
+
+
+def get_response(message):
+    msg = message.lower()
+
+    # Greeting
+    if any(word in msg for word in ["hello", "hi", "hey", "salam", "assalam"]):
+        return (
+            "Hello! 👋 Welcome to our customer support. "
+            "How can I help you?\n\n"
+            "Roman Urdu: Assalam o Alaikum! 👋 Main aapki kis tarah madad kar sakta hoon?"
+        )
+
+    # Price
+    elif any(word in msg for word in ["price", "cost", "rate", "qeemat"]):
+        return (
+            "💰 Please tell me which product you want the price of.\n\n"
+            "Roman Urdu: Bata dein aap kis product ki price maloom karna chahte hain."
+        )
+
+    # Order
+    elif any(word in msg for word in ["order", "mera order", "order kahan"]):
+        return (
+            "📦 Please provide your order number for order status.\n\n"
+            "Roman Urdu: Apna order number bhej dein, main order status check karne mein madad karunga."
+        )
+
+    # Delivery
+    elif any(word in msg for word in ["delivery", "deliver", "kab ayega", "kab aayega"]):
+        return (
+            "🚚 Delivery usually takes 3–5 business days.\n\n"
+            "Roman Urdu: Delivery aam tor par 3–5 working days leti hai."
+        )
+
+    # Refund / Return
+    elif any(word in msg for word in ["refund", "return", "wapis", "wapas"]):
+        return (
+            "🔄 Please provide your order number to request a return or refund.\n\n"
+            "Roman Urdu: Return ya refund ke liye apna order number bhej dein."
+        )
+
+    # Support
+    elif any(word in msg for word in ["support", "help", "madad"]):
+        return (
+            "📞 Our customer support team is here to help you.\n\n"
+            "Roman Urdu: Hamari customer support team aapki madad ke liye mojood hai."
+        )
+
+    # Thank you
+    elif any(word in msg for word in ["thank you", "thanks", "shukriya"]):
+        return (
+            "You're welcome! 😊\n\n"
+            "Roman Urdu: Khushi hui aapki madad karke!"
+        )
+
+    # Goodbye
+    elif any(word in msg for word in ["bye", "goodbye", "allah hafiz"]):
+        return (
+            "Goodbye! 👋 Have a great day!\n\n"
+            "Roman Urdu: Allah Hafiz! 👋 Aapka din acha guzray."
+        )
+
+    else:
+        return (
+            "Sorry, I don't understand your question yet. "
+            "Please choose one of the FAQ options below.\n\n"
+            "Roman Urdu: Maaf kijiye, mujhe aapka sawal samajh nahi aya. "
+            "Neeche diye gaye FAQ options mein se koi option select karein."
+        )
+
+
+# FAQ Section
+st.write("### ❓ Frequently Asked Questions")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("💰 Product Price"):
+        st.session_state.pending_message = "What is the product price?"
+        st.rerun()
+
+    if st.button("📦 Order Status"):
+        st.session_state.pending_message = "Where is my order?"
+        st.rerun()
+
+    if st.button("🔄 Return / Refund"):
+        st.session_state.pending_message = "I want a refund"
+        st.rerun()
+
+with col2:
+    if st.button("🚚 Delivery"):
+        st.session_state.pending_message = "When will my delivery arrive?"
+        st.rerun()
+
+    if st.button("📞 Customer Support"):
+        st.session_state.pending_message = "I need customer support"
+        st.rerun()
+
+
+# Show old messages
 for chat in st.session_state.messages:
     with st.chat_message(chat["role"]):
         st.write(chat["content"])
 
+
 # Chat input
-message = st.chat_input(
-    "Type your message..."
-)
+message = st.chat_input("Type your message...")
+
+if st.session_state.pending_message:
+    message = st.session_state.pending_message
+    st.session_state.pending_message = None
 
 if message:
-    msg = message.lower().strip()
+    st.session_state.messages.append(
+        {"role": "user", "content": message}
+    )
 
-    # Save user message
-    st.session_state.messages.append({
-        "role": "user",
-        "content": message
-    })
+    response = get_response(message)
 
-    # Greeting
-    if re.search(r"\b(hello|hi|hey)\b", msg) or any(x in msg for x in [
-        "salam", "assalam", "aoa", "kya haal",
-        "kaise ho", "kaisay ho", "kese ho"
-    ]):
-        response = (
-            "Hello! 👋 Welcome to our customer support. "
-            "How can I help you?\n\n"
-            "Assalam o Alaikum! 👋 Main aap ki kaise madad kar sakta hoon?"
-        )
+    st.session_state.messages.append(
+        {"role": "assistant", "content": response}
+    )
 
-    # Price
-    elif any(x in msg for x in [
-        "price", "cost", "rate", "qeemat",
-        "kitne", "kitni", "paisa", "paise", "daam"
-    ]):
-        response = (
-            "💰 Please tell me the product name and I will help "
-            "you with its price.\n\n"
-            "💰 Product ka naam batayein, main aap ko us ki price "
-            "ke baare mein bataunga."
-        )
-
-    # Order
-    elif any(x in msg for x in [
-        "order", "tracking", "mera order",
-        "apna order", "order kahan", "order kidhar"
-    ]):
-        response = (
-            "📦 Please provide your order number for order status.\n\n"
-            "📦 Apna order number batayein taake hum order ka "
-            "status check kar saken."
-        )
-
-    # Delivery
-    elif any(x in msg for x in [
-        "delivery", "shipping", "deliver",
-        "delivery kab", "kab ayegi", "kab ayega",
-        "kitne din", "kitnay din"
-    ]):
-        response = (
-            "🚚 Please provide your order number or location "
-            "for delivery information.\n\n"
-            "🚚 Delivery ki maloomat ke liye apna order number "
-            "ya location batayein."
-        )
-
-    # Return / Refund
-    elif any(x in msg for x in [
-        "return", "refund", "exchange",
-        "wapas", "paise wapas",
-        "refund chahiye", "return karna"
-    ]):
-        response = (
-            "🔄 For a return, refund, or exchange, please provide "
-            "your order number and the reason.\n\n"
-            "🔄 Return, refund ya exchange ke liye apna order "
-            "number aur wajah batayein."
-        )
-
-    # Support
-    elif any(x in msg for x in [
-        "contact", "support", "agent",
-        "representative", "madad",
-        "help chahiye", "customer care"
-    ]):
-        response = (
-            "📞 Please tell me your problem and order number.\n\n"
-            "📞 Apna masla aur order number batayein. "
-            "Hamari support team aap ki madad karegi."
-        )
-
-    # Thank you
-    elif any(x in msg for x in [
-        "thank", "thanks", "shukriya",
-        "bohat shukriya"
-    ]):
-        response = (
-            "You're welcome! 😊 Is there anything else I can help you with?\n\n"
-            "Khush aamdeed! 😊 Kya main aap ki mazeed koi madad kar sakta hoon?"
-        )
-
-    # Goodbye
-    elif any(x in msg for x in [
-        "bye", "goodbye", "allah hafiz", "khuda hafiz"
-    ]):
-        response = (
-            "Goodbye! 👋 Have a great day!\n\n"
-            "Allah Hafiz! 👋 Aap ka din acha guzray."
-        )
-
-    # Unknown
-    else:
-        response = (
-            "Sorry, I didn't understand that. 🤔\n\n"
-            "You can ask about:\n"
-            "• Product Price 💰\n"
-            "• Order Status 📦\n"
-            "• Delivery 🚚\n"
-            "• Return / Refund 🔄\n"
-            "• Customer Support 📞\n\n"
-            "Maazrat, main aap ka sawal samajh nahi saka."
-        )
-
-    # Save bot response
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": response
-    })
-
-    # Refresh screen
     st.rerun()
-
-    st.write("### 🤖 Bot Response")
-    st.success(response)
