@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 
 st.set_page_config(
     page_title="AI Customer Support Chatbot",
@@ -7,6 +8,7 @@ st.set_page_config(
 
 st.title("🤖 AI Customer Support Chatbot")
 st.write("Welcome! How can I help you today?")
+st.write("You can chat in English or Roman Urdu.")
 
 message = st.text_input("Enter your message:")
 
@@ -14,71 +16,106 @@ if message:
     msg = message.lower().strip()
 
     # Greeting
-    if any(word in msg for word in ["hello", "hi", "hey"]):
+    if re.search(r"\b(hello|hi|hey)\b", msg) or any(x in msg for x in [
+        "salam", "assalam", "aoa", "kya haal", "kaise ho",
+        "kaisay ho", "kese ho"
+    ]):
         response = (
             "Hello! 👋 Welcome to our customer support. "
-            "How can I help you?"
+            "How can I help you?\n\n"
+            "Assalam o Alaikum! 👋 Main aap ki kaise madad kar sakta hoon?"
         )
 
-    # Product Price
-    elif any(word in msg for word in ["price", "cost", "rate"]):
+    # Price
+    elif any(x in msg for x in [
+        "price", "cost", "rate", "qeemat", "kitne", "kitni",
+        "paisa", "paise", "daam"
+    ]):
         response = (
-            "💰 Please tell me the product name, "
-            "and I will help you with its price."
+            "💰 Please tell me the product name and I will help "
+            "you with its price.\n\n"
+            "💰 Product ka naam batayein, main aap ko us ki price "
+            "ke baare mein bataunga."
         )
 
     # Order
-    elif any(word in msg for word in ["order", "tracking", "order status"]):
+    elif any(x in msg for x in [
+        "order", "tracking", "order status", "mera order",
+        "apna order", "order kahan", "order kidhar"
+    ]):
         response = (
-            "📦 Please provide your order number "
-            "so we can help you with your order status."
+            "📦 Please provide your order number so we can help "
+            "you with your order status.\n\n"
+            "📦 Apna order number batayein taake hum aap ke "
+            "order ka status check kar saken."
         )
 
     # Delivery
-    elif any(word in msg for word in ["delivery", "shipping", "deliver"]):
+    elif any(x in msg for x in [
+        "delivery", "shipping", "deliver", "delivery kab",
+        "kab ayegi", "kab ayega", "kitne din", "kitnay din"
+    ]):
         response = (
             "🚚 Please provide your order number or location "
-            "for delivery information."
+            "for delivery information.\n\n"
+            "🚚 Delivery ki maloomat ke liye apna order number "
+            "ya location batayein."
         )
 
     # Return / Refund
-    elif any(word in msg for word in ["return", "refund", "exchange"]):
+    elif any(x in msg for x in [
+        "return", "refund", "exchange", "wapas",
+        "paise wapas", "refund chahiye", "return karna"
+    ]):
         response = (
-            "🔄 For a return, refund, or exchange, "
-            "please provide your order number and the reason."
+            "🔄 For a return, refund, or exchange, please provide "
+            "your order number and the reason.\n\n"
+            "🔄 Return, refund ya exchange ke liye apna order "
+            "number aur wajah batayein."
         )
 
-    # Contact Support
-    elif any(word in msg for word in [
-        "contact", "support", "agent", "representative"
+    # Support / Help
+    elif any(x in msg for x in [
+        "contact", "support", "agent", "representative",
+        "madad", "help chahiye", "customer care"
     ]):
         response = (
             "📞 Please tell me your problem and order number. "
-            "Our support team will help you."
+            "Our support team will help you.\n\n"
+            "📞 Apna masla aur order number batayein. "
+            "Hamari support team aap ki madad karegi."
         )
 
-    # Thank You
-    elif any(word in msg for word in ["thank", "thanks"]):
+    # Thank you
+    elif any(x in msg for x in [
+        "thank", "thanks", "shukriya", "bohat shukriya"
+    ]):
         response = (
-            "You're welcome! 😊 "
-            "Is there anything else I can help you with?"
+            "You're welcome! 😊 Is there anything else I can help you with?\n\n"
+            "Khush aamdeed! 😊 Kya main aap ki mazeed koi madad kar sakta hoon?"
         )
 
     # Goodbye
-    elif any(word in msg for word in ["bye", "goodbye"]):
+    elif any(x in msg for x in [
+        "bye", "goodbye", "allah hafiz", "khuda hafiz"
+    ]):
         response = (
-            "Goodbye! 👋 Have a great day!"
+            "Goodbye! 👋 Have a great day!\n\n"
+            "Allah Hafiz! 👋 Aap ka din acha guzray."
         )
 
-    # Unknown Question
+    # Unknown question
     else:
         response = (
-            "I can help you with:\n\n"
+            "Sorry, I didn't understand that. You can ask about:\n\n"
             "• Product Price 💰\n"
             "• Order Status 📦\n"
             "• Delivery 🚚\n"
             "• Return / Refund 🔄\n"
-            "• Customer Support 📞"
+            "• Customer Support 📞\n\n"
+            "Maazrat, main aap ka sawal samajh nahi saka. "
+            "Aap price, order, delivery, return/refund ya support "
+            "ke baare mein pooch sakte hain."
         )
 
     st.write("### 🤖 Bot Response")
