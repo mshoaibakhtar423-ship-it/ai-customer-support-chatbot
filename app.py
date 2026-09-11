@@ -6,11 +6,16 @@ st.set_page_config(
     page_icon="🤖"
 )
 
+# Header
 st.title("🤖 AI Customer Support Chatbot")
 st.write("Welcome! How can I help you today?")
-st.write("You can chat in English or Roman Urdu.")
+st.info("You can chat in English or Roman Urdu.")
 
-message = st.text_input("Enter your message:")
+# Chat input
+message = st.text_input(
+    "💬 Enter your message:",
+    placeholder="Example: Where is my order? / Mera order kahan hai?"
+)
 
 if message:
     msg = message.lower().strip()
@@ -40,14 +45,13 @@ if message:
 
     # Order
     elif any(x in msg for x in [
-        "order", "tracking", "order status", "mera order",
-        "apna order", "order kahan", "order kidhar"
+        "order", "tracking", "mera order", "apna order",
+        "order kahan", "order kidhar"
     ]):
         response = (
-            "📦 Please provide your order number so we can help "
-            "you with your order status.\n\n"
-            "📦 Apna order number batayein taake hum aap ke "
-            "order ka status check kar saken."
+            "📦 Please provide your order number for order status.\n\n"
+            "📦 Apna order number batayein taake hum order ka "
+            "status check kar saken."
         )
 
     # Delivery
@@ -74,14 +78,13 @@ if message:
             "number aur wajah batayein."
         )
 
-    # Support / Help
+    # Support
     elif any(x in msg for x in [
         "contact", "support", "agent", "representative",
         "madad", "help chahiye", "customer care"
     ]):
         response = (
-            "📞 Please tell me your problem and order number. "
-            "Our support team will help you.\n\n"
+            "📞 Please tell me your problem and order number.\n\n"
             "📞 Apna masla aur order number batayein. "
             "Hamari support team aap ki madad karegi."
         )
@@ -104,19 +107,18 @@ if message:
             "Allah Hafiz! 👋 Aap ka din acha guzray."
         )
 
-    # Unknown question
+    # Unknown
     else:
         response = (
-            "Sorry, I didn't understand that. You can ask about:\n\n"
+            "Sorry, I didn't understand that. 🤔\n\n"
+            "You can ask about:\n"
             "• Product Price 💰\n"
             "• Order Status 📦\n"
             "• Delivery 🚚\n"
             "• Return / Refund 🔄\n"
             "• Customer Support 📞\n\n"
-            "Maazrat, main aap ka sawal samajh nahi saka. "
-            "Aap price, order, delivery, return/refund ya support "
-            "ke baare mein pooch sakte hain."
+            "Maazrat, main aap ka sawal samajh nahi saka."
         )
 
     st.write("### 🤖 Bot Response")
-    st.write(response)
+    st.success(response)
